@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { marked } from 'marked';
 	import { toast } from 'svelte-sonner';
 	import fileSaver from 'file-saver';
@@ -357,7 +358,7 @@
 							const res = await createNoteHandler(dayjs().format('YYYY-MM-DD'));
 
 							if (res) {
-								goto(`/notes/${res.id}`);
+								goto(`${base}/notes/${res.id}`);
 							}
 						}}
 					>

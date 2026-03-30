@@ -250,7 +250,7 @@ class RedirectMiddleware:
                     redirect_params['q'] = text
 
         if redirect_params:
-            redirect_url = f'/?{urlencode(redirect_params)}'
+            redirect_url = f'{WEBUI_SUBPATH}/?{urlencode(redirect_params)}'
             response = RedirectResponse(url=redirect_url)
             await response(scope, receive, send)
             return
