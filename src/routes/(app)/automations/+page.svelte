@@ -3,6 +3,7 @@
 
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { WEBUI_NAME, mobile, showSidebar, user, config } from '$lib/stores';
 
 	import {
@@ -169,7 +170,7 @@
 			!$config?.features?.enable_automations ||
 			($user?.role !== 'admin' && !($user?.permissions?.features?.automations ?? false))
 		) {
-			goto('/');
+			goto(`${base}/`);
 			return;
 		}
 

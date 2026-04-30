@@ -464,7 +464,7 @@
 			toast.custom(NotificationToast, {
 				componentProps: {
 					onClick: () => {
-						goto('/calendar');
+						goto(`${base}/calendar`);
 					},
 					title: data.title,
 					content: timeStr
@@ -761,12 +761,12 @@
 		}
 		if (event.type === 'query' && (event.data?.query || event.data?.files?.length)) {
 			desktopEvent.set(event);
-			await goto('/');
+			await goto(`${base}/`);
 			return;
 		}
 		if (event.type === 'call') {
 			desktopEvent.set(event);
-			await goto('/');
+			await goto(`${base}/`);
 			return;
 		}
 		if (event.type === 'theme:update' && event.data?.theme) {
