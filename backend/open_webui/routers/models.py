@@ -457,7 +457,6 @@ async def get_model_by_id(id: str, user=Depends(get_verified_user), db: AsyncSes
 @router.get('/model/profile/image')
 async def get_model_profile_image(
     id: str,
-    user=Depends(get_verified_user),
     db: AsyncSession = Depends(get_async_session),
 ):
     model_meta = await Models.get_model_meta_by_id(id, db=db)
