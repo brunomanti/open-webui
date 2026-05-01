@@ -32,6 +32,7 @@ from open_webui.env import (
     WEBSOCKET_SENTINEL_PORT,
     WEBSOCKET_SENTINEL_HOSTS,
     REDIS_KEY_PREFIX,
+    WEBUI_SUBPATH,
     WEBSOCKET_REDIS_OPTIONS,
     WEBSOCKET_SERVER_PING_TIMEOUT,
     WEBSOCKET_SERVER_PING_INTERVAL,
@@ -237,9 +238,11 @@ async def periodic_usage_pool_cleanup():
         release_func()
 
 
+socketio_path = f'{WEBUI_SUBPATH}/ws/socket.io' if WEBUI_SUBPATH else '/ws/socket.io'
+
 app = socketio.ASGIApp(
     sio,
-    socketio_path='/ws/socket.io',
+    socketio_path=socketio_path,
 )
 
 
