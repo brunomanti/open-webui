@@ -381,7 +381,7 @@
 							{#if tool.write_access}
 								<a
 									class=" flex flex-1 space-x-3.5 cursor-pointer w-full"
-									href={`/workspace/tools/edit?id=${encodeURIComponent(tool.id)}`}
+									href={`${base}/workspace/tools/edit?id=${encodeURIComponent(tool.id)}`}
 								>
 									<div class="flex items-center text-left">
 										<div class=" flex-1 self-center">

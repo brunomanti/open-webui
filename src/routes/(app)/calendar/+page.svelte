@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import { onMount, getContext, tick } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
@@ -137,9 +138,9 @@
 		const evt = e.detail;
 		if (evt.meta?.automation_id) {
 			if (evt.meta?.chat_id) {
-				goto(`/c/${evt.meta.chat_id}`);
+				goto(`${base}/c/${evt.meta.chat_id}`);
 			} else {
-				goto(`/automations/${evt.meta.automation_id}`);
+				goto(`${base}/automations/${evt.meta.automation_id}`);
 			}
 			return;
 		}

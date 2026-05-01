@@ -377,6 +377,12 @@ export const generateOpenAIChatCompletion = async (
 	})
 		.then(async (res) => {
 			if (!res.ok) throw await res.json();
+
+			const contentType = res.headers.get('content-type') ?? '';
+			if (contentType.includes('text/event-stream')) {
+				return { stream_response: res };
+			}
+
 			return res.json();
 		})
 		.catch((err) => {

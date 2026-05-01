@@ -210,7 +210,7 @@
 	on:save={(e) => {
 		getAutomationList();
 		if (e.detail?.id) {
-			goto(`/automations/${e.detail.id}`);
+			goto(`${base}/automations/${e.detail.id}`);
 		}
 	}}
 />
@@ -359,7 +359,7 @@
 							{#each automations as automation (automation.id)}
 								<a
 									class="flex space-x-4 text-left w-full px-3 py-2.5 dark:hover:bg-gray-850/50 hover:bg-gray-50 transition rounded-2xl"
-									href={`/automations/${automation.id}`}
+									href={`${base}/automations/${automation.id}`}
 								>
 									<div class="flex-1">
 										<div class="line-clamp-1 text-sm">{automation.name}</div>
@@ -371,7 +371,7 @@
 									<div class="flex flex-row gap-0.5 self-center">
 										<AutomationMenu
 											editHandler={() => {
-												goto(`/automations/${automation.id}`);
+												goto(`${base}/automations/${automation.id}`);
 											}}
 											runHandler={() => {
 												runNowHandler(automation);

@@ -33,7 +33,7 @@
 
 	const copyLinkHandler = async (model) => {
 		const baseUrl = window.location.origin;
-		const res = await copyToClipboard(`${baseUrl}/?model=${encodeURIComponent(model.id)}`);
+		const res = await copyToClipboard(`${baseUrl}${base}/?model=${encodeURIComponent(model.id)}`);
 
 		if (res) {
 			toast.success($i18n.t('Copied link to clipboard'));

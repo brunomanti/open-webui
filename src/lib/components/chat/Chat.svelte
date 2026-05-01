@@ -1670,12 +1670,30 @@
 				message.content += choices[0]?.message?.content;
 			} else {
 				// Stream response
-				let value = choices[0]?.delta?.content ?? '';
-				if (message.content == '' && value == '\n') {
-					console.log('Empty response');
-				} else {
-					message.content += value;
+				const delta = choices[0]?.delta ?? {};
+				const reasoningValue = delta.reasoning_content ?? delta.reasoning ?? '';
+				let value = delta.content ?? '';
 
+				if (reasoningValue) {
+					if (!message.reasoningDetailsOpen) {
+						message.reasoningDetailsOpen = true;
+						message.content += '<details type="reasoning" open>\n<summary>Reasoning</summary>\n\n';
+					}
+					message.content += reasoningValue;
+				} else {
+					if (value && message.reasoningDetailsOpen) {
+						message.content += '\n</details>\n\n';
+						message.reasoningDetailsOpen = false;
+					}
+
+					if (message.content == '' && value == '\n') {
+						console.log('Empty response');
+					} else {
+						message.content += value;
+					}
+				}
+
+				if (reasoningValue || !(message.content == '' && value == '\n')) {
 					if (navigator.vibrate && ($settings?.hapticFeedback ?? false)) {
 						navigator.vibrate(5);
 					}
@@ -1754,6 +1772,11 @@
 		history.messages[message.id] = message;
 
 		if (done) {
+			if (message.reasoningDetailsOpen) {
+				message.content += '\n</details>\n\n';
+				message.reasoningDetailsOpen = false;
+			}
+
 			message.done = true;
 
 			if ($settings.responseAutoCopy) {
@@ -2034,6 +2057,8 @@
 			if ($temporaryChatEnabled) {
 				_chatId = `local:${$socket?.id}`;
 				await chatId.set(_chatId);
+			} else {
+				_chatId = await initChatHandler(history);
 			}
 			await tick();
 		}
@@ -2396,7 +2421,59 @@
 		});
 
 		if (res) {
-			if (res.error) {
+			if (res.stream_response?.body) {
+				const textStream = await createOpenAITextStream(
+					res.stream_response.body,
+					Boolean($settings?.splitLargeChunks ?? false)
+				);
+
+				for await (const update of textStream) {
+					const { value, done, error, sources, usage } = update;
+
+					if (sources && !responseMessage?.sources) {
+						responseMessage.sources = sources;
+					}
+
+					if (usage) {
+						responseMessage.usage = usage;
+					}
+
+					if (error) {
+						await handleOpenAIError(error, responseMessage);
+						break;
+					}
+
+					if (done) {
+						break;
+					}
+
+					if (!(responseMessage.content == '' && value == '\n')) {
+						responseMessage.content += value;
+						history.messages[responseMessageId] = responseMessage;
+						history = history;
+						await tick();
+						if (autoScroll) {
+							scheduleScrollToBottom();
+						}
+					}
+				}
+
+				responseMessage.done = true;
+				history.messages[responseMessageId] = responseMessage;
+				history.currentId = responseMessageId;
+				history = history;
+				await saveChatHandler(_chatId, history);
+				await tick();
+				if (autoScroll) {
+					scrollToBottom();
+				}
+				chatCompletedHandler(
+					_chatId,
+					responseMessage.model,
+					responseMessage.id,
+					createMessagesList(history, responseMessage.id)
+				);
+			} else if (res.error) {
 				await handleOpenAIError(res.error, responseMessage);
 			} else {
 				// Backend returns task_ids (multi-model) or task_id (single model)
@@ -2414,7 +2491,7 @@
 				if (res.chat_id && $chatId !== res.chat_id && $chatId === _chatId) {
 					await chatId.set(res.chat_id);
 					if (!$temporaryChatEnabled) {
-						window.history.replaceState(history.state, '', `/c/${res.chat_id}`);
+						window.history.replaceState(history.state, '', `${base}/c/${res.chat_id}`);
 						currentChatPage.set(1);
 						await chats.set(await getChatList(localStorage.token, $currentChatPage));
 					}

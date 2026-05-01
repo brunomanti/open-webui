@@ -43,9 +43,19 @@ export async function createOpenAITextStream(
 async function* openAIStreamToIterator(
 	reader: ReadableStreamDefaultReader<ParsedEvent>
 ): AsyncGenerator<TextStreamUpdate> {
+	let reasoningDetailsOpen = false;
+
+	const closeReasoningDetails = function* () {
+		if (reasoningDetailsOpen) {
+			reasoningDetailsOpen = false;
+			yield { done: false, value: '\n</details>\n\n' };
+		}
+	};
+
 	while (true) {
 		const { value, done } = await reader.read();
 		if (done) {
+			yield* closeReasoningDetails();
 			yield { done: true, value: '' };
 			break;
 		}
@@ -54,15 +64,16 @@ async function* openAIStreamToIterator(
 		}
 		const data = value.data;
 		if (data.startsWith('[DONE]')) {
+			yield* closeReasoningDetails();
 			yield { done: true, value: '' };
 			break;
 		}
 
 		try {
 			const parsedData = JSON.parse(data);
-			console.log(parsedData);
 
 			if (parsedData.error) {
+				yield* closeReasoningDetails();
 				yield { done: true, value: '', error: parsedData.error };
 				break;
 			}
@@ -82,9 +93,29 @@ async function* openAIStreamToIterator(
 				continue;
 			}
 
+			const delta = parsedData.choices?.[0]?.delta ?? {};
+			const reasoningContent = delta.reasoning_content ?? delta.reasoning ?? '';
+			const content = delta.content ?? '';
+
+			if (reasoningContent) {
+				if (!reasoningDetailsOpen) {
+					reasoningDetailsOpen = true;
+					yield {
+						done: false,
+						value: '<details type="reasoning" open>\n<summary>Reasoning</summary>\n\n'
+					};
+				}
+				yield { done: false, value: reasoningContent };
+				continue;
+			}
+
+			if (content) {
+				yield* closeReasoningDetails();
+			}
+
 			yield {
 				done: false,
-				value: parsedData.choices?.[0]?.delta?.content ?? ''
+				value: content
 			};
 		} catch (e) {
 			console.error('Error extracting delta from SSE event:', e);

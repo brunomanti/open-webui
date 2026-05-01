@@ -141,11 +141,11 @@
 
 	const getMenuItemMeta = (id) => {
 		const items = {
-			notes: { label: 'Notes', href: '/notes', iconType: 'note' },
-			workspace: { label: 'Workspace', href: '/workspace', iconType: 'workspace' },
-			automations: { label: 'Automations', href: '/automations', iconType: 'automations' },
-			calendar: { label: 'Calendar', href: '/calendar', iconType: 'calendar' },
-			playground: { label: 'Playground', href: '/playground', iconType: 'playground' }
+			notes: { label: 'Notes', href: `${base}/notes`, iconType: 'note' },
+			workspace: { label: 'Workspace', href: `${base}/workspace`, iconType: 'workspace' },
+			automations: { label: 'Automations', href: `${base}/automations`, iconType: 'automations' },
+			calendar: { label: 'Calendar', href: `${base}/calendar`, iconType: 'calendar' },
+			playground: { label: 'Playground', href: `${base}/playground`, iconType: 'playground' }
 		};
 		return items[id];
 	};
@@ -725,7 +725,7 @@
 			await initChannels();
 			showCreateChannel = false;
 			showChannels = true;
-			goto(`/channels/${res.id}`);
+			goto(`${base}/channels/${res.id}`);
 		}
 	}}
 />
@@ -1208,7 +1208,7 @@
 						onAdd={async () => {
 							const note = await createNoteHandler('New Note');
 							if (note) {
-								goto(`/notes/${note.id}`);
+								goto(`${base}/notes/${note.id}`);
 							}
 						}}
 						onAddLabel={$i18n.t('New Note')}
@@ -1217,7 +1217,7 @@
 							{#each $pinnedNotes as note (note.id)}
 								<a
 									class="w-full flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-900 transition group text-sm"
-									href={`/notes/${note.id}`}
+									href={`${base}/notes/${note.id}`}
 									on:click={() => {
 										itemClickHandler();
 									}}

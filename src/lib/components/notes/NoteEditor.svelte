@@ -1068,7 +1068,7 @@ Provide the enhanced notes in markdown format. Use markdown syntax for headings,
 									}}
 									onCopyLink={async () => {
 										const baseUrl = window.location.origin;
-										const res = await copyToClipboard(`${baseUrl}/notes/${note.id}`);
+										const res = await copyToClipboard(`${baseUrl}${base}/notes/${note.id}`);
 
 										if (res) {
 											toast.success($i18n.t('Copied link to clipboard'));

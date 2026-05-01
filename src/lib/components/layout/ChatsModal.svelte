@@ -330,7 +330,7 @@
 															on:click={async (e) => {
 																e.stopImmediatePropagation();
 																e.stopPropagation();
-																const shareUrl = `${window.location.origin}/s/${chat.share_id}`;
+																const shareUrl = `${window.location.origin}${base}/s/${chat.share_id}`;
 																await navigator.clipboard.writeText(shareUrl);
 																toast.success($i18n.t('Share link copied to clipboard.'));
 															}}

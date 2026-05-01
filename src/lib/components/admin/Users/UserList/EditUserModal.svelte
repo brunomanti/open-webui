@@ -123,7 +123,7 @@
 														class="px-1.5 py-0.5 rounded-xl bg-gray-100 dark:bg-gray-850 text-xs"
 													>
 														<a
-															href={'/admin/users/groups?id=' + userGroup.id}
+															href={base + '/admin/users/groups?id=' + userGroup.id}
 															on:click|preventDefault={() =>
 																goto(`${base}/admin/users/groups?id=` + userGroup.id)}
 														>

@@ -396,7 +396,7 @@
 											? 'cursor-pointer'
 											: 'cursor-default'}"
 										on:click={() => {
-											if (run.chat_id) goto(`/c/${run.chat_id}`);
+											if (run.chat_id) goto(`${base}/c/${run.chat_id}`);
 										}}
 										type="button"
 									>

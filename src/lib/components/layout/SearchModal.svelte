@@ -29,7 +29,7 @@
 		{
 			label: $i18n.t('Start a new conversation'),
 			onClick: async () => {
-				await goto(`/${query ? `?q=${query}` : ''}`);
+				await goto(`${base}/${query ? `?q=${query}` : ''}`);
 				show = false;
 				onClose();
 			},
