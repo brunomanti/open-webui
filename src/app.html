@@ -72,9 +72,10 @@
 					metaThemeColorTag.setAttribute('content', '#171717');
 				}
 
+				const _preloadAssetsBase = document.querySelector('meta[name="webui-assets"]')?.content || '';
 				const preloadHref = document.documentElement.classList.contains('dark')
-					? '/static/splash-dark.png'
-					: '/static/splash.png';
+					? `${_preloadAssetsBase}/static/splash-dark.png`
+					: `${_preloadAssetsBase}/static/splash.png`;
 				const preload = document.createElement('link');
 				preload.rel = 'preload';
 				preload.as = 'image';
