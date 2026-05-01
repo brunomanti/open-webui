@@ -2335,7 +2335,48 @@
 			{
 				stream: stream,
 				model: model.id,
-				...(messages.length > 0 ? { messages } : {}),
+				// For streaming, use the direct SSE response path instead of the
+				// session/task WebSocket path. llama.cpp/Qwen streams reasoning_content
+				// over SSE; the task path can leave /local-models visually blank while
+				// the backend is busy. The frontend already persists the streamed
+				// history after completion below.
+				...(stream
+					? {
+							messages: [
+								...messages.filter((message) => message?.role === 'system'),
+								...createMessagesList(_history, responseMessage.parentId)
+									.map((message) => {
+										const imageFiles = (message?.files ?? []).filter(
+											(file) => file.type === 'image' || (file?.content_type ?? '').startsWith('image/')
+										);
+
+										return {
+											role: message.role,
+											...(message.output ? { output: message.output } : {}),
+											...(message.role === 'user' && imageFiles.length > 0
+												? {
+														content: [
+															{
+																type: 'text',
+																text: processDetails(message?.merged?.content ?? message.content)
+															},
+															...imageFiles.map((file) => ({
+																type: 'image_url',
+																image_url: {
+																	url: file.url
+																}
+															}))
+														]
+													}
+												: { content: processDetails(message?.merged?.content ?? message.content) })
+										};
+									})
+									.filter((message) => message?.role === 'user' || message?.content?.trim())
+							]
+						}
+					: messages.length > 0
+						? { messages }
+						: {}),
 				params: {
 					...$settings?.params,
 					...params,
@@ -2365,14 +2406,17 @@
 				},
 				model_item: $models.find((m) => m.id === model.id),
 
-				session_id: $socket?.id,
-				chat_id: _chatId || undefined,
-				folder_id: $selectedFolder?.id ?? undefined,
-
-				id: responseMessageId,
-				...(messageIdsMap ? { message_ids: messageIdsMap } : {}),
-				parent_id: userMessage?.parentId ?? null,
-				user_message: userMessage,
+				...(!stream
+					? {
+							session_id: $socket?.id,
+							chat_id: _chatId || undefined,
+							folder_id: $selectedFolder?.id ?? undefined,
+							id: responseMessageId,
+							...(messageIdsMap ? { message_ids: messageIdsMap } : {}),
+							parent_id: userMessage?.parentId ?? null,
+							user_message: userMessage
+						}
+					: {}),
 
 				background_tasks: {
 					...(!$temporaryChatEnabled && !_chatId && (userMessage?.parentId ?? null) === null
