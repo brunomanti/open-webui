@@ -33,14 +33,17 @@ function detailsTokenizer(src: string) {
 
 	const detailsMatch = detailsRegex.exec(src);
 	if (detailsMatch) {
-		const endIndex = findMatchingClosingTag(src, '<details', '</details>');
-		if (endIndex === -1) return;
+		const matchingEndIndex = findMatchingClosingTag(src, '<details', '</details>');
+		const hasClosingTag = matchingEndIndex !== -1;
+		const endIndex = hasClosingTag ? matchingEndIndex : src.length;
 
 		const fullMatch = src.slice(0, endIndex);
 		const detailsTag = detailsMatch[0];
 		const attributes = parseAttributes(detailsTag); // Parse attributes from <details>
 
-		let content = fullMatch.slice(detailsTag.length, -10).trim(); // Remove <details> and </details>
+		let content = hasClosingTag
+			? fullMatch.slice(detailsTag.length, -10).trim() // Remove <details> and </details>
+			: fullMatch.slice(detailsTag.length).trim(); // Render still-streaming/open details blocks live
 		let summary = '';
 
 		const summaryMatch = summaryRegex.exec(content);
